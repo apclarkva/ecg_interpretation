@@ -1,8 +1,6 @@
 ## ECG Interpretation
 
-The `xml_to_ECG.py` file includes a class that reads in a .xml file and creates an ECG signal object.
-
-Currently, the class has methods that can print random waveforms, including arrhythmic ones. 
+The `xml_to_ECG.py` file includes a class that reads in an XML file and creates an ECG signal object. Currently, the class has methods that can print random waveforms, including the `plot_random_arrhythmia()` method, which plots rhythms from the data that were labeled as arrhythmic.
 
 ---
 

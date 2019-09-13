@@ -14,3 +14,6 @@ ECG_SIGNAL = ECGSignal('./data/ecg_biobank_test.xml')
 ```
 
 The script will read the XML file, create a class, print all the tags in the XML file and plot a random arrhythmic trace. 
+
+The baseline plot looks like:
+![ECG Traces](./ECG_example_trace.png)

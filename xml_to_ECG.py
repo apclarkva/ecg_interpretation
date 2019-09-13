@@ -77,7 +77,7 @@ class ECGSignal:
  
         plt.show(data)
  
-    def plot_random_arrhythmia(self):
+    def plot_random_arrhythmia(self, is_saved = False):
         strip_data = self.find_all_nodes(self.arr_data[0], 'Strip')
         num_strips = len(strip_data)
         random_strip = strip_data[int(random.uniform(0, 1)*num_strips)]
@@ -95,6 +95,8 @@ class ECGSignal:
             row = row + 1
 
         plt.tight_layout()
+        plt.xlabel('Time (s)')
+        plt.savefig('ECG_example_trace.png')
         plt.show()
 
 

@@ -1,1 +1,5 @@
 data
+.DS_Store
+*.swp
+.mypy_cache/
+__pycache__/

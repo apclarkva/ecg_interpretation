@@ -21,8 +21,8 @@ class ECGSignal:
         Return waveforms -- if they're not defined, then define them
         """
         if not self._waveforms:
-            self._waveforms = self.find_all_nodes(self.ecg_root,
-                                                  'WaveformData')
+            self._waveforms = self.find_all_nodes(
+                'WaveformData', self.ecg_root)
         return self._waveforms
 
     @property
@@ -31,8 +31,8 @@ class ECGSignal:
         Return arrhythmia data
         """
         if not self._arr_data:
-            self._arr_data = self.find_all_nodes(self.ecg_root,
-                                                 'ArrhythmiaData')
+            self._arr_data = self.find_all_nodes('ArrhythmiaData',
+                                                 self.ecg_root)
         return self._arr_data
 
     def print_all_tags(self, elem, level=0):
@@ -44,19 +44,33 @@ class ECGSignal:
         for child in elem.getchildren():
             self.print_all_tags(child, level+1)
 
-    def find_all_nodes(self, current_node, tag_name):
+    def find_all_nodes(self, tag_name, current_node=None):
         """
         Finds and returns all the nodes for the given tag name
         """
+        if current_node is None:
+            current_node = self.ecg_root
+
         nodes = []
 
         if current_node.tag == tag_name:
             return [current_node]
 
         for child in current_node:
-            nodes += self.find_all_nodes(child, tag_name)
+            nodes += self.find_all_nodes(tag_name, child)
 
         return nodes
+
+    def remove_elements(self, node_names):
+        """
+        Remove all nodes with node_names
+        Args:
+            node_names as a List
+        """
+        for node_name in node_names:
+            nodes = self.find_all_nodes(node_name)
+            for element in nodes:
+                self.ecg_root.remove(element)
 
     def plot_random_waveform(self):
         """
@@ -76,9 +90,9 @@ class ECGSignal:
         plt.ylabel('Voltage')
  
         plt.show(data)
- 
+
     def plot_random_arrhythmia(self, is_saved = False):
-        strip_data = self.find_all_nodes(self.arr_data[0], 'Strip')
+        strip_data = self.find_all_nodes('Strip', self.arr_data[0])
         num_strips = len(strip_data)
         random_strip = strip_data[int(random.uniform(0, 1)*num_strips)]
 
@@ -98,6 +112,12 @@ class ECGSignal:
         plt.xlabel('Time (s)')
         plt.savefig('ECG_example_trace.png')
         plt.show()
+
+    def write_xml(self, path):
+        """
+        Write the current tree to the given file path
+        """
+        self.ecg_tree.write(path)
 
 
 if __name__ == '__main__':

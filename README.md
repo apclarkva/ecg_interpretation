@@ -25,5 +25,7 @@ If you want to deidentify data:
 2. Open **key.py**, scroll to the botthom and set the `path` variable equal to the path to your new folder.
 3. Run **key.py**
 
-**key.py** writes the XML files and key to a folder called `PATH_test`, where `PATH` is equal to the path you proved in step 2. 
+**key.py** writes the XML files and key to a folder called `PATH_test`, where `PATH` is equal to the path you provided in step 2. You can see an example key, filled with fake identifying information of famous cooking reality TV stars, in the root directory.
+
+
 

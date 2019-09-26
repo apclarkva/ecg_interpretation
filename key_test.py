@@ -6,6 +6,7 @@ from key import Key
 import pandas as pd
 import pdb
 
+
 class TestKey(unittest.TestCase):
     """
     I want to test the methods required to deidentify XML data
@@ -32,6 +33,7 @@ class TestKey(unittest.TestCase):
     def test_deidentify_ecg_key_exists(self):
         key = Key(self.path_to_data)
         key.write_key_to_file()
+        pdb.set_trace()
         
         self.assertTrue(os.path.exists(self.expected_path_to_deidentified),
                         'the deidentify function did not create the correct \
@@ -55,19 +57,10 @@ class TestKey(unittest.TestCase):
                 'ACQUISITION_DATE']).all(), 
                 'the saved CSV and current DataFrame are different')
         self.assertTrue((len(new_key_df.loc[new_key_df['FIRST_NAME'] == 'Fred']
-                             ['PROJECT_PT_ID'].unique()) == 1) and
+                             ['DE_ID'].unique()) == 1) and
                         (len(new_key_df.loc[new_key_df['FIRST_NAME'] == 'Fred']
                              ['ACQUISITION_DATE'].unique()) > 1),
                         'the function creates a new id for existing patient')
-
-#    def test_ecg_deidentify_no_demo_data(self):
-#        pass
-#
-#
-#    def test_ecg_deidentify_same_patient_key(self):
-#        pass
-
-
 
 
 if __name__ == '__main__':

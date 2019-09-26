@@ -33,7 +33,6 @@ class TestKey(unittest.TestCase):
     def test_deidentify_ecg_key_exists(self):
         key = Key(self.path_to_data)
         key.write_key_to_file()
-        pdb.set_trace()
         
         self.assertTrue(os.path.exists(self.expected_path_to_deidentified),
                         'the deidentify function did not create the correct \
@@ -46,6 +45,8 @@ class TestKey(unittest.TestCase):
         key = Key(self.path_to_data)
         key.deidentify_all_ecgs()
         key.write_key_to_file()
+
+        pdb.set_trace()
 
         new_key_df = pd.read_csv(
             f'{self.expected_path_to_deidentified}/key.csv')

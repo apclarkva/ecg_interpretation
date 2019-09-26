@@ -32,25 +32,37 @@ class Key:
         
     def deidentify_all_ecgs(self):
         """
-        loop through all the raw xml files in a folder and save
-        identifying information to a key, with an auto-generated 
-
+        Loop through all the raw xml files in a folder and save
+        identifying information to a key, with an auto-generated pt ID. 
+        Insert the identifying ID into the XML file, then
+        removes identifying information from the patient and writes it to
+        an XML file.
         """
+        if not os.path.isdir(self.path_to_deid_xml):
+            if os.path.exists(self.path_to_deid_xml):
+                os.remove(self.path_to_deid_xml)
+            os.mkdir(self.path_to_deid_xml)
+
         self.ecg_file_names = os.listdir(self.path_to_raw_xml)
 
         for ecg_file_name in self.ecg_file_names:
             current_signal = ECGSignal(
                 f'{self.path_to_raw_xml}/{ecg_file_name}')
             self._write_current_signal_to_key(current_signal)
-            #current_signal.remove_elements(self.identifiable_elements)
-            #current_signal.write_xml(self.path_to_deid_xml)
+            de_identifying_number = self.key_df.shape[0]
+            current_signal.add_element('DeidentifyingNumber',
+                    f'{de_identifying_number}', current_signal.ecg_root)
+            current_signal.remove_elements(self.identifiable_elements)
+            current_signal.write_xml(
+                f'{self.path_to_deid_xml}/{de_identifying_number}.xml')
 
     def write_key_to_file(self):
         key_path = f'{self.path_to_deid_xml}/key.csv'
-        if not os.path.exists(self.path_to_deid_xml):
+        if not os.path.isdir(self.path_to_deid_xml):
+            if os.path.exists(self.path_to_deid_xml):
+                os.remove(self.path_to_deid_xml)
             os.mkdir(self.path_to_deid_xml)
 
-        pdb.set_trace()
         if not os.path.exists(key_path):
             self.key_df.to_csv(key_path, index=False)
 

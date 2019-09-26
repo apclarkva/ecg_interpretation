@@ -119,6 +119,15 @@ class ECGSignal:
         """
         self.ecg_tree.write(path)
 
+    def add_element(self, element_name, element_text, first_child_of):
+        if first_child_of is None:
+            first_child_of = self.ecg_root
+
+        new_element = et.Element(element_name)
+        new_element.text = element_text
+
+        first_child_of.insert(0, new_element)
+
 
 if __name__ == '__main__':
     ECG_SIGNAL = ECGSignal('./data/ecg_biobank_test.xml')

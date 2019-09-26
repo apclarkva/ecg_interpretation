@@ -16,3 +16,14 @@ The script will read the XML file, create a class, print all the tags in the XML
 The baseline plot looks like:
 
 ![ECG Traces](./ECG_example_trace.png)
+
+#### To De-Identify Data
+I made a file, **key.py**, that loads in XML files, removes identifying information, and writes the new files to a directory. The program creates a key so we can deidentify the files. 
+
+If you want to deidentify data:
+1. Move all of your XML files into a folder within the **data** directory.
+2. Open **key.py**, scroll to the botthom and set the `path` variable equal to the path to your new folder.
+3. Run **key.py**
+
+**key.py** writes the XML files and key to a folder called `PATH_test`, where `PATH` is equal to the path you proved in step 2. 
+

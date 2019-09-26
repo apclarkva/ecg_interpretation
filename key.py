@@ -29,7 +29,6 @@ class Key:
                      'ACQUISITION_DATE'])
         self.ecg_file_names = []
 
-        
     def deidentify_all_ecgs(self):
         """
         Loop through all the raw xml files in a folder and save
@@ -99,9 +98,8 @@ class Key:
 
         return patient_dict
 
-
-
-
 if __name__ == '__main__':
-    path = 'data/wcm_ecg_test'
-    deidentify(path)
+    path = 'data/PATH_TO_FILES'
+    key_obj = Key(path)
+    key_obj.deidentify_all_ecgs()
+    key_obj.write_key_to_file()

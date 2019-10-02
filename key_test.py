@@ -46,8 +46,6 @@ class TestKey(unittest.TestCase):
         key.deidentify_all_ecgs()
         key.write_key_to_file()
 
-        pdb.set_trace()
-
         new_key_df = pd.read_csv(
             f'{self.expected_path_to_deidentified}/key.csv')
 

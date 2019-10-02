@@ -1,6 +1,6 @@
 import unittest
 import deidentify_ecg
-from xml_to_ecg import ECGSignal
+from xml_to_ECG import ECGSignal
 import os
 import shutil
 import pdb

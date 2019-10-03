@@ -1,13 +1,12 @@
 import os
 from xml_to_ECG import ECGSignal
-import pdb
 import pandas as pd
 
 
 class Key:
     """
     This class is used to deidentify XML ECG files and create a key for
-    reidentifying
+    reidentifying them
     """
     def __init__(self, directory_path,
                  identifiable_elements=['PatientDemographics',
@@ -15,6 +14,19 @@ class Key:
                  nodes_for_key=['PatientID', 'PatientLastName',
                                 'PatientFirstName', 'DateofBirth',
                                 'Gender', 'AcquisitionDate']):
+        """
+        This initializes a Key object
+
+        Parameters
+        ----------
+        deirectory_path: String
+            The path to a directory of XML files you want to deidentify
+        identifiable_elements: List of Strings
+            A list of tag names that include identifiable information
+        nodes_for_key: List of Strings
+            A list of tag names that include identifiable information you want 
+            to save to the key
+        """
         self.identifiable_elements = identifiable_elements
         self.nodes_for_key = nodes_for_key
         self.path_to_raw_xml = directory_path
@@ -31,11 +43,12 @@ class Key:
 
     def deidentify_all_ecgs(self):
         """
-        Loop through all the raw xml files in a folder and save
-        identifying information to a key, with an auto-generated pt ID. 
-        Insert the identifying ID into the XML file, then
-        removes identifying information from the patient and writes it to
-        an XML file.
+        This method does two things:
+            1. Loop through all the raw xml files in a folder and save
+            identifying information to a key, with an auto-generated pt ID.
+            2.Insert the identifying ID into the XML file, then remove
+            identifying information from the patient and write it to an XML
+            file.
         """
         if not os.path.isdir(self.path_to_deid_xml):
             if os.path.exists(self.path_to_deid_xml):
@@ -56,6 +69,10 @@ class Key:
                 f'{self.path_to_deid_xml}/{de_identifying_number}.xml')
 
     def write_key_to_file(self):
+        """
+        This method writes the current key parameter to a .csv file called 
+        key.csv.
+        """
         key_path = f'{self.path_to_deid_xml}/key.csv'
         if not os.path.isdir(self.path_to_deid_xml):
             if os.path.exists(self.path_to_deid_xml):
@@ -66,6 +83,15 @@ class Key:
             self.key_df.to_csv(key_path, index=False)
 
     def _write_current_signal_to_key(self, current_signal):
+        """
+        This method should not be used outside of this class. It is used to 
+        write the identifying information from a patient to the key parameter.
+
+        Parameters
+        ----------
+        current_signal: ECGSignal Object
+            This object includes information for the current patient    
+        """
         patient_vals = []
 
         for tag_name in self.nodes_for_key:
@@ -76,6 +102,24 @@ class Key:
         self.key_df = self.key_df.append(patient_dict, ignore_index=True)
 
     def get_patient_with_id(self, patient_values):
+        """
+        Determines an identification number for the patient, described by
+        the identifying information in patient_values. If the patient exists
+        in the key, then this function will find the original patient ID value.
+        Otherwise, it will return a new ID, by incrementing the previous max ID
+
+        Parameters
+        ----------
+        patient_values: List of Strings
+            This contains identifying information from a current patient
+
+        Returns
+        -------
+        patient_dict: Dictionary of patient information with ID 
+            The dictionary contains key names that match the column names
+            from the key parameter, including an ID key, which is added in
+            this function.
+        """
         df = self.key_df
         pt_id =  df[(df['PATIENT_ID'] == patient_values[0]) & 
                     (df['LAST_NAME'] == patient_values[1]) & 
@@ -98,8 +142,9 @@ class Key:
 
         return patient_dict
 
+
 if __name__ == '__main__':
-    path = 'data/PATH_TO_FILES'
-    key_obj = Key(path)
-    key_obj.deidentify_all_ecgs()
-    key_obj.write_key_to_file()
+    PATH = 'data/PATH_TO_FILES'
+    KEY_OBJ = Key(path)
+    KEY_OBJ.deidentify_all_ecgs()
+    KEY_OBJ.write_key_to_file()

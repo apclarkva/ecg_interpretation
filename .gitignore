@@ -3,3 +3,4 @@ data
 *.swp
 .mypy_cache/
 __pycache__/
+musexmlexport/*.csv

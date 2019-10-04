@@ -759,7 +759,7 @@ class XmlElementParser:
     def getData(self):
         """This method returns the character data that was collected during
         parsing and it strips any leading or trailing whitespace"""
-        return string.strip(self.__data_Text)
+        return str.strip(self.__data_Text)
         
     def start_element(self, name, attrs, context):
         print ("""abstract method, called at the start of an XML element""")
@@ -842,7 +842,7 @@ class LeadUnitsPerBitElementParser(XmlElementParser):
     def end_element(self, name, context):
         if name == self.Tag:
             self.restoreState(context)
-            context.setAdu(float(string.strip(self.getData())))            
+            context.setAdu(float(str.strip(self.getData())))            
         
 class LeadUnitsElementParser(XmlElementParser):
     """State for handling the LeadAmplitudeUnits element"""
@@ -858,7 +858,7 @@ class LeadUnitsElementParser(XmlElementParser):
     def end_element(self, name, context):
         if name == self.Tag:
             self.restoreState(context)
-            context.setUnits(string.strip(self.getData()))            
+            context.setUnits(str.strip(self.getData()))            
         
 
 class WaveformTypeElementParser(XmlElementParser):
@@ -875,7 +875,7 @@ class WaveformTypeElementParser(XmlElementParser):
     def end_element(self, name, context):
         if name == self.Tag:
             self.restoreState(context)
-            if string.find(self.getData(), "Rhythm") >= 0:
+            if str.find(self.getData(), "Rhythm") >= 0:
                 context.setRhythmFound(1)
                 print(f'ECG {self.getData()} object found.')
             else:
@@ -940,6 +940,8 @@ class WaveformDataElementParser(XmlElementParser):
             self.restoreState(context)
             if context.found_Rhythm:
                 print (f'  Adding data for lead {self.getData()}.')
+                context.addWaveformData(self.getData())
+
     
 class MuseXmlParser:
     """This class is the parsing context in the object-oriented State pattern."""
@@ -1005,8 +1007,8 @@ class MuseXmlParser:
         # Append the data into our huge ZCG buffer in the correct order
         for t in range(0,n,2):
             for lead in self.ecg_Leads:
-                    sample = struct.unpack("h", self.ecg_Data[lead][t] + self.ecg_Data[lead][t+1])
-                    self.zcg.append(sample[0])        
+                    sample = struct.unpack("h", bytes([self.ecg_Data[lead][t], self.ecg_Data[lead][t+1]]))
+                    self.zcg.append(sample[0])
                                 
     def writeCSV(self, file_Name):
         """This function writes the ZCG buffer to a CSV file. All 12 or 15 leads
@@ -1060,7 +1062,7 @@ class MuseXmlParser:
                         fd.write("%d, " % int(samples[lead] * self.adu_Gain))
                 fd.write("\n")
         print (f'\nCSV file ({file_Name}) is generated, with {len(header) + len(extra_Leads)} columns of ECG signals')
-        print( f'ECG sampling rate is {self.sample_rate} Hz.')
+        print( f'ECG sampling rate is {self.sample_Rate} Hz.')
         print( f'ECG stored in units of {self.units}.')
 
 ###############################################################################
@@ -1135,8 +1137,6 @@ TOOL, NOR ITS OUTPUT, CAN IT BE USED TO MAKE MEDICAL DIAGNOSIS OR TREATMENT.
     
     print (f'Parsing XML file {arg[0]}')
     # Read the XML file and parse it
-    import pdb
-    pdb.set_trace()
     P.ParseFile(open(arg[0], 'rb'))
         
     # convert the data into a ZCG buffer

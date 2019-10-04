@@ -22,7 +22,7 @@ class ECGSignal:
         """
         if not self._waveforms:
             self._waveforms = self.find_all_nodes(
-                'WaveformData', self.ecg_root)
+                'WaveFormData', self.ecg_root)
         return self._waveforms
 
     @property
@@ -133,3 +133,9 @@ if __name__ == '__main__':
     ECG_SIGNAL = ECGSignal('./data/ecg_biobank_test.xml')
     ECG_SIGNAL.print_all_tags(ECG_SIGNAL.ecg_root)
     ECG_SIGNAL.plot_random_arrhythmia()
+    import pdb
+    pdb.set_trace()
+
+    #rand_wf = ECG_SIGNAL.waveforms[9].text
+    #y = [c for c in rand_wf if c.isdigit()]
+    # Can plot y

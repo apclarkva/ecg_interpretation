@@ -13,7 +13,8 @@ class Key:
                                         'TestDemographics', 'Order'],
                  nodes_for_key=['PatientID', 'PatientLastName',
                                 'PatientFirstName', 'DateofBirth',
-                                'Gender', 'AcquisitionDate']):
+                                'Gender', 'AcquisitionDate'],
+                 afib_key=None):
         """
         This initializes a Key object
 
@@ -41,8 +42,53 @@ class Key:
                      'ACQUISITION_DATE'])
         self.ecg_file_names = []
 
+
+    def write_ecgs_key_and_csv(self):
+        """
+        Read in every xml file and save the strip data to a .csv file in either
+        the normal folder or the ecg folder.
+        Save identifying information to the key.
+        """
+        pt_keys_paths = self.get_paths_and_afib_ids(self.path_to_raw_xml)
+
+        for pt in pt_keys_paths:
+            new_pt = xml_to_ECG(pt[1])
+            import pdb
+            pdb.set_trace()
+            
+
+
+
+    def get_paths_and_afib_ids(self, path_to_data):
+        """
+        Finds all XML files in root, then returns them with an ID.
+        
+        Parameters
+        ----------
+        path_to_data: String
+            Inside of this folder, there should be XML files. The files
+            can be nested within other folders.
+
+        Returns 
+        -------
+        file_paths: List of Lists
+            A list of lists that contain the afib key identifier in postiion 1
+            and the path to the file in position 2.
+        """
+        file_paths = []
+        for root, dirs, files in os.walk(path_to_data):
+            for file_name in files:
+                if ('.xml' in file_name):
+                    path = f'{root}/{file_name}'
+                    key_id = file_name.split('_')[0]
+                    file_paths.append([key_id, path])
+
+        return file_paths
+
     def deidentify_all_ecgs(self):
         """
+        TODO: CONSIDER DELETING THIS – DEPRECATED FROM 
+        write_ecgs_key_and_csv()
         This method does two things:
             1. Loop through all the raw xml files in a folder and save
             identifying information to a key, with an auto-generated pt ID.

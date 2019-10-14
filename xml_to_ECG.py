@@ -2,6 +2,7 @@ import xml.etree.ElementTree as et
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import pandas as pd
 import pdb
 
 
@@ -21,8 +22,8 @@ class ECGSignal:
         Return waveforms -- if they're not defined, then define them
         """
         if not self._waveforms:
-            self._waveforms = self.find_all_nodes(
-                'WaveformData', self.ecg_root)
+            self._waveforms = self.find_strip_data(
+                'WaveformData')
         return self._waveforms
 
     @property
@@ -60,6 +61,24 @@ class ECGSignal:
             nodes += self.find_all_nodes(tag_name, child)
 
         return nodes
+ 
+    def find_strip_data(self, wf_tag_name='WaveformData',
+                        strip_tag_name='StripData'):
+        """
+            Finds all waveform nodes that are inside StripData element.
+        """
+        strip_node = self.find_all_nodes(strip_tag_name, self.ecg_root)[0]
+        waveforms = self.find_all_nodes(wf_tag_name, strip_node)
+
+        waveform_pd = pd.DataFrame()
+
+        for wave in waveforms:
+            lead_name = wave.attrib['lead']
+            lead_values = np.array([int(num_str) for num_str in
+                                    wave.text.split(',')])
+            waveform_pd[lead_name] = lead_values
+
+        return waveform_pd
 
     def remove_elements(self, node_names):
         """
@@ -113,6 +132,28 @@ class ECGSignal:
         plt.savefig('ECG_example_trace.png')
         plt.show()
 
+    def plot_twelve_lead(self, is_saved=False):
+        """
+        Plot an image with all twelve leads
+        """
+        self.waveforms.plot(subplots=True,
+                            layout=(6, 2),
+                            figsize=(6, 6),
+                            sharex=False,
+                            sharey=False,
+                            legend=False,
+                            style=['k' for i in range(12)])
+        axes = plt.gcf().get_axes()
+        for ax in axes:
+            ax.axis('off')
+            
+        plt.show()
+
+
+        
+    
+
+
     def write_xml(self, path):
         """
         Write the current tree to the given file path
@@ -130,11 +171,9 @@ class ECGSignal:
 
 
 if __name__ == '__main__':
-    ECG_SIGNAL = ECGSignal('./data/1071249_20205_2_0.xml')
-    ECG_SIGNAL.print_all_tags(ECG_SIGNAL.ecg_root)
-    ECG_SIGNAL.plot_random_waveform()
+    ECG_SIGNAL = ECGSignal('./data/twelve-lead/1071249_20205_2_0.xml')
+    ECG_SIGNAL.plot_twelve_lead()
 
     #rand_wf = ECG_SIGNAL.waveforms[9].text
     #y = [c for c in rand_wf if c.isdigit()]
     # Can plot y
-

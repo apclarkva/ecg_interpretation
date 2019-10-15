@@ -1,5 +1,5 @@
 import numpy as np
-from tensorflow import keras
+#from tensorflow import keras
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
@@ -23,9 +23,7 @@ class Models():
     def format_input_data(self):
         file_names = listdir(self.path_to_data)
         
-        self.input_data = np.zeros((len(file_names), self.signal_length, 12))
-
-        index = 0
+        self.input_data = np.zeros((len(file_names)*100, self.signal_length, 12))
 
         for file_name in file_names:
             current_path = f'{self.path_to_data}/{file_name}'
@@ -33,6 +31,7 @@ class Models():
 
             self.input_data[index, :, :] = current_data[0:self.signal_length, :]
             index += 1
+            print(index)
 
 
     def get_autoencoder(self):

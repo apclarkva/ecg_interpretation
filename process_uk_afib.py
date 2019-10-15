@@ -40,8 +40,15 @@ class ProcessUK:
             new_pt = ECGSignal(pt[1])
             diagnosis_nodes = new_pt.find_all_nodes('DiagnosisText')
             diagnoses = [element.text for element in diagnosis_nodes]
-            is_normal = self.get_is_normal(pt[0], diagnoses)
-            is_afib = self.get_is_afib(pt[0], diagnoses)
+            try:
+                is_normal = self.get_is_normal(pt[0], diagnoses)
+                is_afib = self.get_is_afib(pt[0], diagnoses)
+            except:
+                import pdb
+                pdb.set_trace()
+
+            print(pt[1])
+		
 
             if is_normal:
                 classification = 'normal'
@@ -81,7 +88,7 @@ class ProcessUK:
             Returns true if the patient iwth pt_id has afib
         """
         for diagnosis in diagnoses:
-            if ('fib' in diagnosis.lower()):
+            if ('fibrillation' in diagnosis.lower()):
                 return 1
             return 0
 
@@ -114,7 +121,7 @@ class ProcessUK:
 
 
 if __name__ == '__main__':
-    path_to_data = './data/forAlex'
+    path_to_data = './data/ecg'
     UK_OBJ = ProcessUK(path_to_data)
     UK_OBJ.write_ecgs_to_csv()
 

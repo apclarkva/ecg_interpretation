@@ -10,10 +10,17 @@ class ECGSignal:
     """A class for reading in data from XML files, and displaying important
     information
     """
-    def __init__(self, ecg_file):
-        self.ecg_tree = et.parse(ecg_file)
-        self.ecg_root = self.ecg_tree.getroot()
-        self._waveforms = []
+    def __init__(self, ecg_file=None, waveform_csv=None):
+        if ecg_file:
+            self.ecg_tree = et.parse(ecg_file)
+            self.ecg_root = self.ecg_tree.getroot()
+
+        if not waveform_csv:
+            self._waveforms = pd.DataFram()
+        else:
+
+            self._waveforms = pd.read_csv(waveform_csv)
+
         self._arr_data = []
 
     @property
@@ -21,7 +28,7 @@ class ECGSignal:
         """
         Return waveforms -- if they're not defined, then define them
         """
-        if not self._waveforms:
+        if self._waveforms.empty:
             self._waveforms = self.find_strip_data(
                 'WaveformData')
         return self._waveforms
@@ -171,7 +178,7 @@ class ECGSignal:
 
 
 if __name__ == '__main__':
-    ECG_SIGNAL = ECGSignal('./data/twelve-lead/1071249_20205_2_0.xml')
+    ECG_SIGNAL = ECGSignal(waveform_csv='./data/afib_example/4642804.csv')
     ECG_SIGNAL.plot_twelve_lead()
 
     #rand_wf = ECG_SIGNAL.waveforms[9].text

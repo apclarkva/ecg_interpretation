@@ -39,10 +39,23 @@ class Models():
     def load_from_npy(self, directory_path):
         file_names = listdir(directory_path)
 
+        self.input_data = np.zeros((len(file_names), self.signal_length, 12))
         index = 0
-        for file_name in flie_names:
+        for file_name in file_names:
+            current_path = f'{self.path_to_data}/{file_name}'
+            current_signal = np.load(current_path)
+            current_signal = self._norm_signal_channels(current_signal)
+            self.input_data[index, :, :] = current_signal[0:self.signal_length, :]
+            index+=1
+    
+    def _norm_signal_channels(self, signal_all_channels):
+        return np.apply_along_axis(self._norm_column, 1, signal_all_channels)
 
-
+    def _norm_column(self, signal):
+        positive_signal = signal + np.abs(signal.min())
+        normalized_signal = positive_signal / positive_signal.max()
+        return normalized_signal
+        
 
     def get_autoencoder(self):
         input_shape = self.input_shape

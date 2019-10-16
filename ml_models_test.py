@@ -11,10 +11,12 @@ class TestModels(unittest.TestCase):
     Test the Models class
     """
     def test_autoencoder(self):
-        path_to_signal = './data/forAlex/normal'
+        path_to_signals = './data/forAlex/normal_pickled'
 
-        model_obj = Models(path_to_signal, t_span=2048)
-        model_obj.input_data = np.load('./data/normal_pickled_400/pickled_0.npy')[:, 0:1024, :]
+        model_obj = Models(path_to_signals, t_span=2048)
+        model_obj.load_from_npy(path_to_signals)
+        import pdb
+        pdb.set_trace()
         #model_obj.format_input_data()
         arr_1 = np.load('./data/normal_pickled_400/pickled_0.npy')
         arr_2 = np.load('./data/normal_pickled_400/pickled_800.npy')

@@ -54,7 +54,6 @@ class ProcessUK:
             np.save(f'./{self.path_to_raw_xml}/{classification}_pickled/{pt[0]}', 
                     new_pt.waveforms.values)
 
-
     def get_is_normal(self, pt_id, diagnoses):
         d_1 = diagnoses[0].lower()
         d_2 = diagnoses[1].lower()
@@ -85,6 +84,7 @@ class ProcessUK:
             return 0
 
         return 
+
     def get_paths_and_afib_ids(self, path_to_data):
         """
         Finds all XML files in root, then returns them with an ID.

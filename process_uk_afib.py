@@ -37,6 +37,7 @@ class ProcessUK:
         """
         pt_keys_paths = self.get_paths_and_afib_ids(self.path_to_raw_xml)
 
+        index = 0
         for pt in pt_keys_paths:
             new_pt = ECGSignal(pt[1])
             diagnosis_nodes = new_pt.find_all_nodes('DiagnosisText')
@@ -45,20 +46,21 @@ class ProcessUK:
                 is_normal = self.get_is_normal(pt[0], diagnoses)
                 is_afib = self.get_is_afib(pt[0], diagnoses)
             except:
-                import pdb
-                pdb.set_trace()
+                is_normal = False
+                is_afib = False
+                
 
-            print(pt[1])
 		
-
             if is_normal:
                 classification = 'normal'
             elif is_afib:
                 classification = 'afib'
             else:
                 continue
+            print(index)
+            index += 1
 
-            np.save(f'./{self.path_to_raw_xml}/{classification}_pickled/{pt[0]}', 
+            np.save(f'./{self.path_to_raw_xml}/{classification}_pickled_ind/{pt[0]}', 
                     new_pt.waveforms.values)
 
 

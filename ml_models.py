@@ -39,7 +39,7 @@ class Models():
     def load_from_npy(self, directory_path):
         file_names = listdir(directory_path)
 
-        if len(file_names) > 1000:
+        if len(file_names) > 100:
             file_names = file_names[0:1000]
             import pdb
             pdb.set_trace()

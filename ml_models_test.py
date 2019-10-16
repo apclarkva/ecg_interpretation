@@ -15,6 +15,8 @@ class TestModels(unittest.TestCase):
 
         model_obj = Models(path_to_signals, t_span=2048)
         model_obj.load_from_npy(path_to_signals)
+        model_obj.get_autoencoder()
+        model_obj.current_model.summary()
         import pdb
         pdb.set_trace()
         
@@ -35,8 +37,6 @@ class TestModels(unittest.TestCase):
             index += 1 
 
 
-        model_obj.get_autoencoder()
-        model_obj.current_model.summary()
 
         autoencoder = model_obj.current_model
         autoencoder.fit(model_obj.input_data, model_obj.input_data, verbose=1, batch_size=300, epochs=8)

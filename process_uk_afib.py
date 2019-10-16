@@ -1,5 +1,6 @@
 from xml_to_ECG import ECGSignal
 
+import numpy as np
 import pandas as pd
 import os
 
@@ -28,7 +29,7 @@ class ProcessUK:
                                     sep=' ',
                                     header=None)
 
-    def write_ecgs_to_csv(self):
+    def write_ecgs_to_npy(self):
         """
         Read in every xml file and save the strip data to a .csv file in either
         the normal folder or the ecg folder.
@@ -52,15 +53,13 @@ class ProcessUK:
 
             if is_normal:
                 classification = 'normal'
-                new_pt.waveforms.to_csv(
-                    f'./{self.path_to_raw_xml}/{classification}/{pt[0]}.csv',
-                    index=False)
-            if is_afib:
+            elif is_afib:
                 classification = 'afib'
-                new_pt.waveforms.to_csv(
-                    f'./{self.path_to_raw_xml}/{classification}/{pt[0]}.csv',
-                    index=False)
-                
+            else:
+                continue
+
+            np.save(f'./{self.path_to_raw_xml}/{classification}_pickled/{pt[0]}', 
+                    new_pt.waveforms.values)
 
 
     def get_is_normal(self, pt_id, diagnoses):
@@ -119,10 +118,9 @@ class ProcessUK:
 
         return file_paths
 
-
 if __name__ == '__main__':
     path_to_data = './data/ecg'
     UK_OBJ = ProcessUK(path_to_data)
-    UK_OBJ.write_ecgs_to_csv()
+    UK_OBJ.write_ecgs_to_npy()
 
     

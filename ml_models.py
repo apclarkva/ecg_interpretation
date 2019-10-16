@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from os import listdir
 
+
 class Models():
     """
     A Class for creating all ML models
@@ -34,6 +35,13 @@ class Models():
                 self.input_data[index, :, :] = current_data[0:self.signal_length, :]
                 index += 1
                 print(index)
+
+    def load_from_npy(self, directory_path):
+        file_names = listdir(directory_path)
+
+        index = 0
+        for file_name in flie_names:
+
 
 
     def get_autoencoder(self):

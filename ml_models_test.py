@@ -1,7 +1,10 @@
 from ml_models import Models
 import unittest
 import matplotlib.pyplot as plt
+import numpy as np
 import pdb
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 class TestModels(unittest.TestCase):
     """
@@ -10,15 +13,38 @@ class TestModels(unittest.TestCase):
     def test_autoencoder(self):
         path_to_signal = './data/forAlex/normal'
 
-        model_obj = Models(path_to_signal, t_span=4096)
-        pdb.set_trace()
-        model_obj.format_input_data()
+        model_obj = Models(path_to_signal, t_span=2048)
+        model_obj.input_data = np.load('./data/normal_pickled_400/pickled_0.npy')[:, 0:1024, :]
+        #model_obj.format_input_data()
+        arr_1 = np.load('./data/normal_pickled_400/pickled_0.npy')
+        arr_2 = np.load('./data/normal_pickled_400/pickled_800.npy')
+        arr_3 = np.load('./data/normal_pickled_400/pickled_1200.npy')
+        arr_4 = np.load('./data/normal_pickled_400/pickled_2400.npy')
+        arr_5 = np.load('./data/normal_pickled_400/pickled_4000.npy')
+        arr_6 = np.load('./data/normal_pickled_400/pickled_5200.npy')
+        
+        model_obj.input_data = np.concatenate((arr_1, arr_2, arr_3, arr_4, arr_5, arr_6), axis=0)[:, 0:1024, 0:2]
+        #model_obj.input_data = np.concatenate((arr_1, arr_2), axis=0)[:, 0:1024, 0:12]
+
+        index = 0
+        for row in range(0,2400):
+            min_zero = model_obj.input_data[index,:,0].min()
+            min_one = model_obj.input_data[index,:,1].min()
+            if min_zero < 0:
+                model_obj.input_data[index,:,0] -= min_zero
+            if min_one <0:
+                model_obj.input_data[index,:,1] -= min_one 
+
+            model_obj.input_data[index,:,0] /= model_obj.input_data[index,:,0].max()
+            model_obj.input_data[index,:,1] /= model_obj.input_data[index,:,1].max()
+            index += 1 
+
 
         model_obj.get_autoencoder()
         model_obj.current_model.summary()
 
         autoencoder = model_obj.current_model
-        autoencoder.fit(model_obj.input_data, model_obj.input_data, verbose=1, batch_size=100, epochs=3000)
+        autoencoder.fit(model_obj.input_data, model_obj.input_data, verbose=1, batch_size=300, epochs=8)
         pdb.set_trace()
 
 

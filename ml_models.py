@@ -14,7 +14,7 @@ class Models():
 
     def __init__(self, path_to_data, model_name='autoencoder', t_span=4096):
         self.signal_length = int(t_span/2)
-        self.input_shape = Input(shape=(self.signal_length,12))
+        self.input_shape = Input(shape=(self.signal_length,2))
         self.path_to_data = path_to_data
 
         self.input_data = np.array([])
@@ -25,13 +25,15 @@ class Models():
         
         self.input_data = np.zeros((len(file_names)*100, self.signal_length, 12))
 
-        for file_name in file_names:
-            current_path = f'{self.path_to_data}/{file_name}'
-            current_data = np.loadtxt(current_path, skiprows=1, delimiter=',')
+        index = 0
+        for i in range(0, 100):
+            for file_name in file_names:
+                current_path = f'{self.path_to_data}/{file_name}'
+                current_data = np.loadtxt(current_path, skiprows=1, delimiter=',')
 
-            self.input_data[index, :, :] = current_data[0:self.signal_length, :]
-            index += 1
-            print(index)
+                self.input_data[index, :, :] = current_data[0:self.signal_length, :]
+                index += 1
+                print(index)
 
 
     def get_autoencoder(self):
@@ -67,7 +69,7 @@ class Models():
         conv_d1 = Conv1D(32, 4, activation='relu', padding='same')(up2)
         up1 = UpSampling1D(4)(conv_d1)
 
-        rec_signal = Conv1D(12, 3, activation='sigmoid', padding='same')(up1)
+        rec_signal = Conv1D(2, 3, activation='sigmoid', padding='same')(up1)
 
         autoencoder = Model(input=input_shape, output=rec_signal)
         autoencoder.compile(optimizer='adam', loss='mse')

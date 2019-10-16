@@ -16,9 +16,8 @@ class ECGSignal:
             self.ecg_root = self.ecg_tree.getroot()
 
         if not waveform_csv:
-            self._waveforms = pd.DataFram()
+            self._waveforms = pd.DataFrame()
         else:
-
             self._waveforms = pd.read_csv(waveform_csv)
 
         self._arr_data = []

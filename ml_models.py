@@ -39,6 +39,11 @@ class Models():
     def load_from_npy(self, directory_path):
         file_names = listdir(directory_path)
 
+        if len(file_names) > 1000:
+            file_names = file_names[0:1000]
+            import pdb
+            pdb.set_trace()
+
         self.input_data = np.zeros((len(file_names), self.signal_length, 12))
         index = 0
         for file_name in file_names:
@@ -55,7 +60,6 @@ class Models():
         positive_signal = signal + np.abs(signal.min())
         normalized_signal = positive_signal / positive_signal.max()
         return normalized_signal
-        
 
     def get_autoencoder(self):
         input_shape = self.input_shape

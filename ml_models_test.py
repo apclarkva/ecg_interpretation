@@ -17,15 +17,8 @@ class TestModels(unittest.TestCase):
         model_obj.load_from_npy(path_to_signals)
         import pdb
         pdb.set_trace()
-        #model_obj.format_input_data()
-        arr_1 = np.load('./data/normal_pickled_400/pickled_0.npy')
-        arr_2 = np.load('./data/normal_pickled_400/pickled_800.npy')
-        arr_3 = np.load('./data/normal_pickled_400/pickled_1200.npy')
-        arr_4 = np.load('./data/normal_pickled_400/pickled_2400.npy')
-        arr_5 = np.load('./data/normal_pickled_400/pickled_4000.npy')
-        arr_6 = np.load('./data/normal_pickled_400/pickled_5200.npy')
         
-        model_obj.input_data = np.concatenate((arr_1, arr_2, arr_3, arr_4, arr_5, arr_6), axis=0)[:, 0:1024, 0:2]
+        #model_obj.input_data = np.concatenate((arr_1, arr_2, arr_3, arr_4, arr_5, arr_6), axis=0)[:, 0:1024, 0:2]
         #model_obj.input_data = np.concatenate((arr_1, arr_2), axis=0)[:, 0:1024, 0:12]
 
         index = 0

@@ -135,19 +135,19 @@ class Models():
         up4 = UpSampling1D(2)(conv_d4)
 
         #3
-        conv_d3 = Conv1D(128, 9, activation='relu', padding='same')(up4)
+        conv_d3 = Conv1D(256, 9, activation='relu', padding='same')(up4)
         up3 = UpSampling1D(2)(conv_d3)
 
         #2
-        conv_d2 = Conv1D(64, 4, activation='relu', padding='same')(up3)
+        conv_d2 = Conv1D(128, 4, activation='relu', padding='same')(up3)
         up2 = UpSampling1D(2)(conv_d2)
 
         #1
-        conv_d1 = Conv1D(32, 4, activation='relu', padding='same')(up2)
+        conv_d1 = Conv1D(64, 4, activation='relu', padding='same')(up2)
         up1 = UpSampling1D(2)(conv_d1)
 
         #out
-        rec_signal = Conv1D(self.num_channels, 3, activation='sigmoid', padding='same')(up1)
+        rec_signal = Dense(12, activation='sigmoid')(up1)
 
         autoencoder = Model(input=input_shape, output=rec_signal)
         autoencoder.compile(optimizer='adam', loss='mse')
@@ -159,18 +159,48 @@ class Models():
         input_shape = self.input_shape
 
         #encoder
-        conv_e1 = Conv1D(32, 4, activation='relu', padding='same')(
+        #1
+        conv_e1 = Conv1D(32, 20, activation='relu', padding='same')(
             input_shape)
-        conv_e1_2 = Conv1D(64, 4, activation='relu', padding='same')(
-            conv_e1)
-        pool_e1 = MaxPooling1D(2, padding='same')(conv_e1_2)
+        pool_e1 = MaxPooling1D(2, padding='same')(conv_e1)
 
-        conv_d1 = Conv1D(32, 4, activation='relu', padding='same')(pool_e1)
+        #2
+        conv_e2 = Conv1D(64, 4, activation='relu', padding='same')(
+            pool_e1)
+        conv_e2_2 = Conv1D(64, 4, activation='relu', padding='same')(
+            conv_e2)
+        pool_e2 = MaxPooling1D(2, padding='same')(conv_e2_2)
+
+        #3
+        conv_e3 = Conv1D(32, 4, activation='relu', padding='same')(
+            pool_e2)
+        conv_e3_2 = Conv1D(32, 4, activation='relu', padding='same')(
+            conv_e3)
+        pool_e3 = MaxPooling1D(2, padding='same')(conv_e3_2)
+
+
+        #3
+        conv_d3 = Conv1D(32, 4, activation='relu', padding='same')(pool_e3)
+        conv_d3_2 = Conv1D(32, 4, activation='relu', padding='same')(conv_d3)
+        up3 = UpSampling1D(2)(conv_d3_2)
+
+        #2 
+        conv_d2_2 = Conv1D(64, 4, activation='relu', padding='same')(up3)
+        conv_d2 = Conv1D(32, 30, activation='relu', padding='same')(conv_d2_2)
+        up2 = UpSampling1D(2)(conv_d2)
+
+        #1
+        conv_d1 = Conv1D(32, 4, activation='relu', padding='same')(up2)
         up1 = UpSampling1D(2)(conv_d1)
 
-        rec_signal = Conv1D(num_channels, 3, activation='sigmoid', padding='same')(up1)
+        #out
+        rec_signal = Dense(12, activation='sigmoid')(up1)
 
         autoencoder = Model(input=input_shape, output=rec_signal)
         autoencoder.compile(optimizer='adam', loss='mse')
 
         self.current_model = autoencoder
+
+
+
+

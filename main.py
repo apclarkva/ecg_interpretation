@@ -37,7 +37,7 @@ def main():
     #encoder stuff
     model_obj.get_encoder()
     model_obj.encode_data()
-    model_obj.get_pca_encoded(is_plotted=True)
+    #model_obj.get_pca_encoded(is_plotted=True)
 
     model_obj.current_model.save('./data/first_cluster.h5')
     

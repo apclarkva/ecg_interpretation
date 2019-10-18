@@ -10,7 +10,10 @@ try:
     import matplotlib.pyplot as plt
 except:
     print('no matplotlib')
-from sklearn.decomposition import PCA
+try:
+    from sklearn.decomposition import PCA
+except: 
+    print('no sklearn')
 
 
 

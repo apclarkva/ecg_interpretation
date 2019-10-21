@@ -4,13 +4,12 @@ import os
 #import matplotlib.pyplot as plt
 import pandas as pd
 from keras.models import load_model
-from sklearn.decomposition import PCA
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def main():
     model_obj = Models(t_span=2048, num_channels=12)
-    num_obs = 40
+    num_obs = 4000
 
     #Data
     path_to_afibs = 'data/ecg/afib_pickled_ind'

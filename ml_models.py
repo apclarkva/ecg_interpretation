@@ -80,81 +80,50 @@ class Models():
 
         #encoder
         #1
-        conv_e1 = Conv1D(64, 4, activation='relu', padding='same')(
+        conv_e1 = Conv1D(32, 20, activation='relu', padding='same')(
             input_shape)
         pool_e1 = MaxPooling1D(2, padding='same')(conv_e1)
 
         #2
-        conv_e2 = Conv1D(128, 4, activation='relu', padding='same')(
+        conv_e2 = Conv1D(64, 4, activation='relu', padding='same')(
             pool_e1)
-        pool_e2 = MaxPooling1D(2, padding='same')(conv_e2)
+        conv_e2_2 = Conv1D(64, 4, activation='relu', padding='same')(
+            conv_e2)
+        pool_e2 = MaxPooling1D(2, padding='same')(conv_e2_2)
 
         #3
-        conv_e3 = Conv1D(256, 9, activation='relu', padding='same')(
+        conv_e3 = Conv1D(32, 4, activation='relu', padding='same')(
             pool_e2)
-        pool_e3 = MaxPooling1D(2, padding='same')(conv_e3)
+        conv_e3_2 = Conv1D(32, 4, activation='relu', padding='same')(
+            conv_e3)
+        pool_e3 = MaxPooling1D(2, padding='same')(conv_e3_2)
 
         #4
-        conv_e4 = Conv1D(512, 9, activation='relu', padding='same')(
+        conv_e4 = Conv1D(32, 4, activation='relu', padding='same')(
             pool_e3)
-        pool_e4= MaxPooling1D(2, padding='same')(conv_e4)
+        conv_e4_2 = Conv1D(16, 4, activation='relu', padding='same')(
+            conv_e4)
+        pool_e4 = MaxPooling1D(2, padding='same')(conv_e4_2)
 
-        #5
-        conv_e5 = Conv1D(512, 6, activation='relu', padding='same')(
-            pool_e4)
-        conv_e5_2 = Conv1D(256, 8, activation='relu', padding='same')(
-            conv_e5)
-        pool_e5 = MaxPooling1D(2, padding='same')(conv_e5_2)
-
-        #6
-        conv_e6 = Conv1D(512, 12, activation='relu', padding='same')(
-            pool_e5)
-        conv_e6_2 = Conv1D(256, 5, activation='relu', padding='same')(
-            conv_e6)
-        pool_e6 = MaxPooling1D(2, padding='same')(conv_e6_2)
-
-        #7
-        conv_e7 = Conv1D(128, 4, activation='relu', padding='same')(
-            pool_e6)
-        conv_e7_2 = Conv1D(128, 2, activation='relu', padding='same')(
-            conv_e7)
-
-
-        low_dim = MaxPooling1D(2, padding='same')(conv_e7_2)
-
-
-        # Decoder
-        #7
-        conv_d7 = Conv1D(128, 2, activation='relu', padding='same')(
-            low_dim)
-        conv_d7_2 = Conv1D(128, 4, activation='relu', padding='same')(
-            conv_d7)
-        up7 = UpSampling1D(2)(conv_d7_2)
-
-        #6
-        conv_d6 = Conv1D(256, 5, activation='relu', padding='same')(up7)
-        conv_d6_2 = Conv1D(512, 12, activation='relu', padding='same')(conv_d6)
-        up6 = UpSampling1D(2)(conv_d6_2)
-
-        #5
-        conv_d5 = Conv1D(256, 8, activation='relu', padding='same')(up6)
-        conv_d5_2 = Conv1D(512, 6, activation='relu', padding='same')(conv_d5)
-        up5 = UpSampling1D(2)(conv_d5_2)
 
         #4
-        conv_d4 = Conv1D(512, 9, activation='relu', padding='same')(up5)
-        up4 = UpSampling1D(2)(conv_d4)
+        conv_d4 = Conv1D(32, 4, activation='relu', padding='same')(pool_e4)
+        conv_d4_2 = Conv1D(32, 4, activation='relu', padding='same')(conv_d4)
+        up4 = UpSampling1D(2)(conv_d4_2)
+
 
         #3
-        conv_d3 = Conv1D(256, 9, activation='relu', padding='same')(up4)
-        up3 = UpSampling1D(2)(conv_d3)
+        conv_d3 = Conv1D(32, 4, activation='relu', padding='same')(up4)
+        conv_d3_2 = Conv1D(32, 4, activation='relu', padding='same')(conv_d3)
+        up3 = UpSampling1D(2)(conv_d3_2)
 
-        #2
-        conv_d2 = Conv1D(128, 4, activation='relu', padding='same')(up3)
+        #2 
+        conv_d2_2 = Conv1D(64, 4, activation='relu', padding='same')(up3)
+        conv_d2 = Conv1D(32, 30, activation='relu', padding='same')(conv_d2_2)
         up2 = UpSampling1D(2)(conv_d2)
 
         #1
-        conv_d1 = Conv1D(64, 4, activation='relu', padding='same')(up2)
+        conv_d1 = Conv1D(32, 4, activation='relu', padding='same')(up2)
         up1 = UpSampling1D(2)(conv_d1)
 
         #out
@@ -164,6 +133,7 @@ class Models():
         autoencoder.compile(optimizer='adam', loss='mse')
 
         self.current_model = autoencoder
+
 
     def get_small_autoencoder(self):
         input_shape = self.input_shape
@@ -212,7 +182,7 @@ class Models():
         self.current_model = autoencoder
 
     def get_encoder(self):
-        encoded_layer = self.current_model.layers[ int(len(self.current_model.layers)/2)]
+        encoded_layer = self.current_model.layers[int(len(self.current_model.layers)/2)]
         self.encoder = Model(self.current_model.inputs, encoded_layer.output)
 
     def get_error_by_input(self):

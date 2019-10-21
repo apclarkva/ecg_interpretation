@@ -2,7 +2,7 @@
  
 #SBATCH --partition=panda   # cluster-specific
 #SBATCH --nodes=1
-#SBATCH --ntasks=28
+#SBATCH --ntasks=100
 #SBATCH --job-name=autoencoder
 #SBATCH --time=08:00:00   # HH/MM/SS
 #SBATCH --mem=28G

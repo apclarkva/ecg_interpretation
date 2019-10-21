@@ -10,7 +10,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def main():
     model_obj = Models(t_span=2048, num_channels=12)
-    num_obs = 4000
+    num_obs = 40
 
     #Data
     path_to_afibs = 'data/ecg/afib_pickled_ind'
@@ -19,7 +19,7 @@ def main():
     model_obj.load_data(path_to_afibs, num_files=300, rhythm_type='afib')
 
     #Setup
-    model_obj.get_small_autoencoder()
+    model_obj.get_autoencoder()
     model_obj.current_model.summary()
         
     #Run
@@ -28,7 +28,7 @@ def main():
     #Calculate performance
     model_obj.get_error_by_input()
     model_obj.evaluate_model()
-    model_obj.predict_test_data(is_plotted)
+    model_obj.predict_test_data()
 
     print(f'Evaluation of normal data is {model_obj.norm_eval}')
     print(f'Evaluation of afib data is {model_obj.afib_eval}')

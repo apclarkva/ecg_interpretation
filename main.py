@@ -9,7 +9,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def main():
     model_obj = Models(t_span=2048, num_channels=12)
-    num_obs = 4000
+    num_obs = 7000
 
     #Data
     path_to_afibs = 'data/ecg/afib_pickled_ind'
@@ -18,11 +18,11 @@ def main():
     model_obj.load_data(path_to_afibs, num_files=300, rhythm_type='afib')
 
     #Setup
-    model_obj.get_autoencoder()
+    model_obj.get_50x_autoencoder()
     model_obj.current_model.summary()
         
     #Run
-    model_obj.run_autoencoder(n_epochs=200)
+    model_obj.run_autoencoder(n_epochs=400)
 
     #Calculate performance
     model_obj.get_error_by_input()

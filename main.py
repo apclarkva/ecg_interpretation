@@ -8,7 +8,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def main():
-    model_obj = Models(t_span=2048, num_channels=12)
+    model_obj = Models(t_span=4096, num_channels=12)
     num_obs = 7000
 
     #Data
@@ -38,7 +38,7 @@ def main():
     model_obj.encode_data()
     #model_obj.get_pca_encoded(is_plotted=True)
 
-    model_obj.current_model.save('./data/auto_10x_4000obs.h5')
+    model_obj.current_model.save('./data/auto_50x_7000obs_4s.h5')
     
     #plotting
     #model_obj.plot_history()

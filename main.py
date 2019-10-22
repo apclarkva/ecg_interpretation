@@ -2,7 +2,6 @@ from ml_models import Models
 import numpy as np
 import os
 #import matplotlib.pyplot as plt
-import pandas as pd
 from keras.models import load_model
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 

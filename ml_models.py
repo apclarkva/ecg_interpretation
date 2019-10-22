@@ -2,7 +2,6 @@ import numpy as np
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
-import pandas as pd
 import numpy as np
 from os import listdir
 import random
@@ -14,7 +13,10 @@ try:
     from sklearn.decomposition import PCA
 except: 
     print('no sklearn')
-
+try:
+    import pandas as pd
+except: 
+    print('no pandas')
 
 
 
@@ -74,6 +76,90 @@ class Models():
             positive_signal = signal + np.abs(signal.min())
         normalized_signal = positive_signal / positive_signal.max()
         return normalized_signal
+
+    def get_100x_autoencoder(self):
+        input_shape = self.input_shape
+
+        #encoder
+        #1
+        conv_e1 = Conv1D(32, 20, activation='relu', padding='same')(
+            input_shape)
+        pool_e1 = MaxPooling1D(2, padding='same')(conv_e1)
+
+        #2
+        conv_e2 = Conv1D(64, 4, activation='relu', padding='same')(
+            pool_e1)
+        conv_e2_2 = Conv1D(64, 4, activation='relu', padding='same')(
+            conv_e2)
+        pool_e2 = MaxPooling1D(2, padding='same')(conv_e2_2)
+
+        #3
+        conv_e3 = Conv1D(32, 4, activation='relu', padding='same')(
+            pool_e2)
+        conv_e3_2 = Conv1D(32, 4, activation='relu', padding='same')(
+            conv_e3)
+        pool_e3 = MaxPooling1D(2, padding='same')(conv_e3_2)
+
+        #4
+        conv_e4 = Conv1D(32, 4, activation='relu', padding='same')(
+            pool_e3)
+        conv_e4_2 = Conv1D(16, 4, activation='relu', padding='same')(
+            conv_e4)
+        pool_e4 = MaxPooling1D(2, padding='same')(conv_e4_2)
+
+        #5
+        conv_e5 = Conv1D(16, 4, activation='relu', padding='same')(
+            pool_e4)
+        conv_e5_2 = Conv1D(8, 4, activation='relu', padding='same')(
+            conv_e5)
+        pool_e5 = MaxPooling1D(2, padding='same')(conv_e5_2)
+
+        #6
+        conv_e6 = Conv1D(16, 4, activation='relu', padding='same')(
+            pool_e5)
+        conv_e6_2 = Conv1D(8, 4, activation='relu', padding='same')(
+            conv_e6)
+        pool_e6 = MaxPooling1D(2, padding='same')(conv_e6_2)
+
+
+        #6
+        conv_d6 = Conv1D(8, 4, activation='relu', padding='same')(pool_e6)
+        conv_d6_2 = Conv1D(16, 4, activation='relu', padding='same')(conv_d6)
+        up6 = UpSampling1D(2)(conv_d6_2)
+
+        #5
+        conv_d5 = Conv1D(8, 4, activation='relu', padding='same')(up6)
+        conv_d5_2 = Conv1D(16, 4, activation='relu', padding='same')(conv_d5)
+        up5 = UpSampling1D(2)(conv_d5_2)
+
+
+        #4
+        conv_d4 = Conv1D(16, 4, activation='relu', padding='same')(up5)
+        conv_d4_2 = Conv1D(32, 4, activation='relu', padding='same')(conv_d4)
+        up4 = UpSampling1D(2)(conv_d4_2)
+
+
+        #3
+        conv_d3 = Conv1D(32, 4, activation='relu', padding='same')(up4)
+        conv_d3_2 = Conv1D(32, 4, activation='relu', padding='same')(conv_d3)
+        up3 = UpSampling1D(2)(conv_d3_2)
+
+        #2 
+        conv_d2_2 = Conv1D(64, 4, activation='relu', padding='same')(up3)
+        conv_d2 = Conv1D(32, 30, activation='relu', padding='same')(conv_d2_2)
+        up2 = UpSampling1D(2)(conv_d2)
+
+        #1
+        conv_d1 = Conv1D(32, 4, activation='relu', padding='same')(up2)
+        up1 = UpSampling1D(2)(conv_d1)
+
+        #out
+        rec_signal = Dense(12, activation='sigmoid')(up1)
+
+        autoencoder = Model(input=input_shape, output=rec_signal)
+        autoencoder.compile(optimizer='adam', loss='mse')
+
+        self.current_model = autoencoder
 
     def get_50x_autoencoder(self):
         input_shape = self.input_shape

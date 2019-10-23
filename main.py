@@ -7,8 +7,11 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def main():
-    model_obj = Models(t_span=4096, num_channels=12)
-    num_obs = 7000
+    num_obs = 9000
+    num_epochs = 700
+    time_span = 4096
+    model_obj = Models(t_span=time_span, num_channels=12)
+    
 
     #Data
     path_to_afibs = 'data/ecg/afib_pickled_ind'
@@ -17,11 +20,11 @@ def main():
     model_obj.load_data(path_to_afibs, num_files=300, rhythm_type='afib')
 
     #Setup
-    model_obj.get_50x_autoencoder()
+    model_obj.get_100x_autoencoder()
     model_obj.current_model.summary()
         
     #Run
-    model_obj.run_autoencoder(n_epochs=400)
+    model_obj.run_autoencoder(n_epochs=num_epochs)
 
     #Calculate performance
     model_obj.get_error_by_input()
@@ -37,7 +40,7 @@ def main():
     model_obj.encode_data()
     #model_obj.get_pca_encoded(is_plotted=True)
 
-    model_obj.current_model.save('./data/auto_50x_7000obs_4s.h5')
+    model_obj.current_model.save(f'./data/auto_100x_{num_obs}obs_{time_span}ms_{num_epochs}epochs.h5')
     
     #plotting
     #model_obj.plot_history()

@@ -36,10 +36,32 @@ def pickle_data(path_to_data, batch_size):
         np.save(f'{path_to_data}/pickled_{batch_size}/pickled_{start_val}',
                 batch_data)
 
+def get_train_val_loss(file_out, write_file):
+    with open(file_out, 'r') as fp:
+        line = line = fp.readline()
+
+        new_file = np.array([])
+        while line:
+            if 'val_loss' in line:
+                new_file = np.append(new_file, line.strip())
+            if 'Evaluation of' in line:
+                new_file = np.append(new_file, line.strip())
+                 
+
+            print(line.strip())
+            
+            line = fp.readline()
+
+        np.savetxt(write_file, new_file, fmt='%s')
 
 
 
 
 
 if __name__ == '__main__':
-    pickle_data('data/forAlex/normal', 30)
+    slurm = 'slurm-1116824'
+    file_name = f'{slurm}.out'
+    write_to = f'./data/auto_48x_4480obs_4s.csv'
+    get_train_val_loss(file_name, write_to)
+
+

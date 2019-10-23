@@ -28,9 +28,7 @@ class Models():
     def __init__(self, model_name='autoencoder',
                  slices=3, num_channels=12, test_proportion=.8, 
                  ecg_time_samples=5000):
-        self.signal_length = int(ecg_time_samples/slices)
         self.slices = slices
-        self.input_shape = Input(shape=(self.signal_length,num_channels))
         self.num_channels = num_channels
         self.test_proportion = test_proportion
 
@@ -41,6 +39,12 @@ class Models():
         self.encoder = []
         self.norm_predict = []
         self.history = []
+
+        self.signal_length = int(ecg_time_samples/slices)
+        if not ((self.signal_length % 2) == 0):
+            self.signal_length -= 1
+
+        self.input_shape = Input(shape=(self.signal_length,num_channels))
 
     def load_data(self, path_to_data ,num_files=100, rhythm_type='normal'):
         file_names = listdir(path_to_data)
@@ -53,7 +57,7 @@ class Models():
                                self.num_channels))
 
         index = 0
-        t_span = int(5000/self.slices)
+        t_span = self.signal_length
         for file_name in file_names:
             current_path = f'{path_to_data}/{file_name}'
             current_signal = np.load(current_path)
@@ -161,6 +165,10 @@ class Models():
 
         #out
         rec_signal = Dense(12, activation='sigmoid')(up1)
+
+        if rec_signal.shape[1].value != self.signal_length:
+            crop_length = int((rec_signal.shape[1].value - self.signal_length)/2)
+            rec_signal = Cropping1D(crop_length)(rec_signal)
 
         autoencoder = Model(input=input_shape, output=rec_signal)
         autoencoder.compile(optimizer='adam', loss='mse')

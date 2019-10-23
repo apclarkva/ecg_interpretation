@@ -6,6 +6,34 @@ from keras.models import load_model
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
+def load_main():
+    model_obj = Models(t_span=4096, num_channels=12)
+    num_obs = 700
+
+    #Data
+    path_to_afibs = 'data/ecg/afib_pickled_ind'
+    path_to_normals = 'data/ecg/normal_pickled_ind'
+    model_obj.normal_training = []
+    model_obj.load_data(path_to_normals, num_obs, rhythm_type='normal')
+    model_obj.load_data(path_to_afibs, num_files=300, rhythm_type='afib')
+
+    model_obj.current_model =  load_model('./data/model_results/auto_50x_7000obs_4s/auto_50x_7000obs_4s.h5')
+
+    import pdb
+    pdb.set_trace()
+
+    #Calculate performance
+    model_obj.get_error_by_input()
+    model_obj.evaluate_model()
+    model_obj.predict_test_data(is_plotted=True)
+
+    print(f'Evaluation of normal data is {model_obj.norm_eval}')
+    print(f'Evaluation of afib data is {model_obj.afib_eval}')
+
+    #plotting
+    model_obj.plot_random_test_wave('normal')
+    model_obj.plot_random_test_wave('afib')
+
 def main():
     model_obj = Models(t_span=2048, num_channels=12)
     num_obs = 7000
@@ -41,8 +69,8 @@ def main():
     
     #plotting
     #model_obj.plot_history()
-    #model_obj.plot_random_test_wave('normal')
-    #model_obj.plot_random_test_wave('afib')
+    model_obj.plot_random_test_wave('normal')
+    model_obj.plot_random_test_wave('afib')
 
 if __name__ == '__main__':
-    main()
+    load_main()

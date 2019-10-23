@@ -53,12 +53,15 @@ class Models():
                                self.num_channels))
 
         index = 0
+        t_span = int(5000/self.slices)
         for file_name in file_names:
             current_path = f'{path_to_data}/{file_name}'
             current_signal = np.load(current_path)
             current_signal = self._norm_signal_channels(current_signal)
             for num in range(self.slices):
-                input_data[index, :, :] = current_signal[0:self.signal_length,
+                start_index = num * t_span
+                end_index = (num+1)*t_span
+                input_data[index, :, :] = current_signal[start_index:end_index,
                                                          0:self.num_channels]
                 index+=1
 

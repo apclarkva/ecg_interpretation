@@ -26,8 +26,10 @@ class Models():
     """
 
     def __init__(self, model_name='autoencoder',
-                 t_span=4096, num_channels=12, test_proportion=.8):
-        self.signal_length = int(t_span/2)
+                 slices=3, num_channels=12, test_proportion=.8, 
+                 ecg_time_samples=5000):
+        self.signal_length = int(ecg_time_samples/slices)
+        self.slices = slices
         self.input_shape = Input(shape=(self.signal_length,num_channels))
         self.num_channels = num_channels
         self.test_proportion = test_proportion
@@ -46,7 +48,7 @@ class Models():
         if len(file_names) > num_files:
             file_names = file_names[0:num_files]
 
-        input_data = np.zeros((len(file_names),
+        input_data = np.zeros((len(file_names)*self.slices,
                                self.signal_length,
                                self.num_channels))
 
@@ -55,11 +57,12 @@ class Models():
             current_path = f'{path_to_data}/{file_name}'
             current_signal = np.load(current_path)
             current_signal = self._norm_signal_channels(current_signal)
-            input_data[index, :, :] = current_signal[0:self.signal_length,
-                                                     0:self.num_channels]
-            index+=1
+            for num in range(self.slices):
+                input_data[index, :, :] = current_signal[0:self.signal_length,
+                                                         0:self.num_channels]
+                index+=1
 
-        num_training = round(num_files * self.test_proportion)
+        num_training = round(num_files * self.slices * self.test_proportion)
         if rhythm_type == 'normal': 
             self.normal_training = input_data[0:num_training, :, :]
             self.normal_testing = input_data[num_training:, :, :]

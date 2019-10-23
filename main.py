@@ -35,13 +35,12 @@ def load_main():
     model_obj.plot_random_test_wave('afib')
 
 def main():
-    num_obs = 9000
+    num_obs = 15
     num_epochs = 700
-    time_span = 4096
-    model_obj = Models(t_span=time_span, num_channels=12)
+    num_slices = 3 
+    model_obj = Models(slices=num_slices, num_channels=12)
     
-
-    #Data
+    # Data
     path_to_afibs = 'data/ecg/afib_pickled_ind'
     path_to_normals = 'data/ecg/normal_pickled_ind'
     model_obj.load_data(path_to_normals, num_obs, rhythm_type='normal')
@@ -68,7 +67,7 @@ def main():
     model_obj.encode_data()
     #model_obj.get_pca_encoded(is_plotted=True)
 
-    model_obj.current_model.save(f'./data/auto_100x_{num_obs}obs_{time_span}ms_{num_epochs}epochs.h5')
+    model_obj.current_model.save(f'./data/auto_100x_{num_obs}obs_{num_slices}ms_{num_epochs}epochs.h5')
     
     #plotting
     #model_obj.plot_history()
@@ -76,4 +75,4 @@ def main():
     model_obj.plot_random_test_wave('afib')
 
 if __name__ == '__main__':
-    load_main()
+    main()

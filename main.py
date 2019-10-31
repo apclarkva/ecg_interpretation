@@ -7,8 +7,9 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def load_main():
-    model_obj = Models(t_span=4096, num_channels=12)
     num_obs = 700
+    num_slices = 3 
+    model_obj = Models(slices=num_slices, num_channels=12)
 
     #Data
     path_to_afibs = 'data/ecg/afib_pickled_ind'
@@ -17,18 +18,19 @@ def load_main():
     model_obj.load_data(path_to_normals, num_obs, rhythm_type='normal')
     model_obj.load_data(path_to_afibs, num_files=300, rhythm_type='afib')
 
-    model_obj.current_model =  load_model('./data/model_results/auto_50x_7000obs_4s/auto_50x_7000obs_4s.h5')
-
-    import pdb
-    pdb.set_trace()
+    model_obj.current_model =  load_model('./data/model_results/auto_400x_9500obs_3slices_1500epochs/auto_400x_9500obs_3slices_1500epochs.h5')
 
     #Calculate performance
     model_obj.get_error_by_input()
     model_obj.evaluate_model()
     model_obj.predict_test_data(is_plotted=True)
 
+
+    model_obj.get_roc_curve()
     print(f'Evaluation of normal data is {model_obj.norm_eval}')
     print(f'Evaluation of afib data is {model_obj.afib_eval}')
+    import pdb
+    pdb.set_trace()
 
     #plotting
     model_obj.plot_random_test_wave('normal')
@@ -75,4 +77,4 @@ def main():
     model_obj.plot_random_test_wave('afib')
 
 if __name__ == '__main__':
-    main()
+    load_main()

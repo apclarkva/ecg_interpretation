@@ -11,6 +11,7 @@ except:
     print('no matplotlib')
 try:
     from sklearn.decomposition import PCA
+    from sklearn.metrics import auc
 except: 
     print('no sklearn')
 try:
@@ -37,7 +38,7 @@ class Models():
         self.afib_data = np.array([])
         self.current_model = []
         self.encoder = []
-        self.norm_predict = []
+        self.norm_predict = np.array([])
         self.history = []
 
         self.signal_length = int(ecg_time_samples/slices)
@@ -356,21 +357,51 @@ class Models():
         encoded_layer = self.current_model.layers[int(len(self.current_model.layers)/2)]
         self.encoder = Model(self.current_model.inputs, encoded_layer.output)
 
-    def get_error_by_input(self):
+    def get_error_by_input(self, e_type='mae'):
         try:
-            self.norm_errors = self._return_all_errors(self.normal_testing)
+            self.norm_errors = self._return_all_errors(self.normal_testing, error_type=e_type)
+            self.norm_max_errors = self._get_pt_errors(self.norm_errors, 'max')
+            self.norm_avg_errors = self._get_pt_errors(self.norm_errors, 'avg')
+            self.norm_errors_var = self._return_all_errors(self.normal_testing, error_type='error_var')
+            self.norm_errors_test_avg = self._get_pt_errors(self.norm_errors_var, 'avg')
         except:
             print('Could not get normal testing errors')
         try:
-            self.afib_errors = self._return_all_errors(self.afib_data)
+            self.afib_errors = self._return_all_errors(self.afib_data, error_type=e_type)
+            self.afib_max_errors = self._get_pt_errors(self.afib_errors, 'max')
+            self.afib_avg_errors = self._get_pt_errors(self.afib_errors, 'avg')
+            self.afib_errors_var = self._return_all_errors(self.afib_data, error_type='error_var')
+            self.afib_errors_test_avg = self._get_pt_errors(self.afib_errors_var, 'avg')
+
         except:
             print('Could not get afib testing errors')
 
-    def _return_all_errors(self, input_data):
+    def _get_pt_errors(self, input_data, error_type):
+        num_patients = int(len(input_data)/self.slices)
+        errors = []
+        for i in range(0, num_patients):
+            start = i*self.slices
+            end = (i + 1)*self.slices
+            if error_type == 'max':
+                errors.append(input_data[start:end].max())
+            elif error_type == 'avg': 
+                errors.append(input_data[start:end].mean())
+
+
+        return np.array(errors)
+
+    def _return_all_errors(self, input_data, error_type='mae'):
         test_error = np.zeros(len(input_data[:, 0, 0]))
         for i in range(0, len(test_error)):
             current_input = np.expand_dims(input_data[i,:,:], axis=0)
-            test_error[i] = self.current_model.evaluate(current_input, current_input)
+            if error_type == 'mae':
+                test_error[i] = self.current_model.evaluate(current_input, current_input)
+            elif error_type == 'error_var':
+                output = self.current_model.predict(current_input)
+                error = current_input - output
+                #test_error[i] = np.sort(np.abs(error.flatten()))[-500:].mean()
+                test_error[i] =  np.abs(error)[:,:,7].mean()
+            print(i)
 
         return test_error
 
@@ -404,26 +435,80 @@ class Models():
             print('Could not plot loss')
 
     def evaluate_model(self):
-        if not self.history:
-            return
-
         self.norm_eval = self.current_model.evaluate(self.normal_testing,
                                                      self.normal_testing)
         self.afib_eval = self.current_model.evaluate(self.afib_data,
                                                      self.afib_data)
 
-    def predict_test_data(self, is_plotted=False, n_bin=40, n_range=.02):
-        if not self.norm_predict:
+    def predict_test_data(self, is_plotted=False, n_bin=40, n_range=.02, error_type='avg'):
+        if self.norm_predict.size == 0:
             self.norm_predict = self.current_model.predict(self.normal_testing)
             self.afib_predict = self.current_model.predict(self.afib_data)
 
         if is_plotted:
-            plt.hist(self.norm_errors,
-                     bins=n_bin, alpha=0.5, range=(0, n_range))
-            plt.hist(self.afib_errors,
-                     bins=n_bin, alpha=0.5, range=(0, n_range))
+            if error_type == 'avg':
+                norm_errors = self.norm_avg_errors
+                afib_errors = self.afib_avg_errors
+            elif error_type == 'max':
+                norm_errors = self.norm_max_errors
+                afib_errors = self.afib_max_errors
+            else:
+                norm_errors = self.norm_errors
+                afib_errors = self.afib_errors
+
+            plt.hist(norm_errors, bins=n_bin, alpha=0.5, range=(0, n_range), label = 'Normal')
+            plt.hist(afib_errors, bins=n_bin, alpha=0.5, range=(0, n_range), label = 'A Fib')
+            plt.xlabel('Reconstruction Error')
+            plt.ylabel('Probability Density')
+            plt.legend()
             plt.show()
 
+    def _get_roc_data(self, negatives, positives):
+        all_values = np.append(negatives, positives)
+        min_value = all_values.min()
+        max_value = all_values.max()
+
+        thresholds = np.arange(min_value, max_value, .0001)
+
+        sensitivity = np.zeros(len(thresholds))
+        specificity = np.zeros(len(thresholds))
+
+        index = 0
+
+        for thr in thresholds:
+            sensitivity[index] = np.array(positives > thr).mean()
+            specificity[index] = np.array(negatives < thr).mean()
+            
+            index +=1
+        
+        roc = pd.DataFrame(np.transpose(np.array([sensitivity, specificity,
+            thresholds])), columns = ['SENSITIVITY', 'SPECIFICITY', 'THRESHOLDS'])
+        
+        false_positive = 1-roc.SPECIFICITY
+
+        print(f"Area under the curve is {auc(false_positive, roc.SENSITIVITY)}")
+
+        return roc
+
+    def get_roc_curve(self, is_plotted = True):
+        roc_max = self._get_roc_data(self.norm_max_errors, self.afib_max_errors)
+        roc_avg = self._get_roc_data(self.norm_avg_errors,self.afib_avg_errors)
+        #roc_all = self._get_roc_data(self.norm_errors, self.afib_errors)
+
+        roc_test = self._get_roc_data(self.norm_errors_var, self.afib_errors_var)
+        roc_test_avg = self._get_roc_data(self.norm_errors_test_avg, self.afib_errors_test_avg)
+
+        if is_plotted:
+            diagonal = [0, 1]
+            plt.plot(1-roc_max.SPECIFICITY, roc_max.SENSITIVITY, label='MAE Worst 3s')
+            plt.plot(1-roc_avg.SPECIFICITY, roc_avg.SENSITIVITY, label='MAE 10s')
+            #plt.plot(roc_all.SPECIFICITY, 1-roc_all.SENSITIVITY, label='All')
+            #plt.plot(roc_test.SPECIFICITY, 1-roc_test.SENSITIVITY, label='Test')
+            plt.plot(diagonal,diagonal)
+            plt.legend()
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.show()
 
     def encode_data(self):
         encoder = self.encoder
@@ -447,15 +532,13 @@ class Models():
         components = pca.fit_transform(pca_inputs)
 
         if is_plotted:
-            import pdb
-            pdb.set_trace()
             num_normal = len(self.norm_encoded_flat[:,0])
+
             plt.scatter(components[0:num_normal,0], components[0:num_normal,1])
             plt.scatter(components[num_normal:,0], components[num_normal:,1])
             plt.show()
 
         return components
-
 
     def plot_random_test_wave(self, wave_type='normal'):
         rand_num = random.random()
@@ -489,5 +572,4 @@ class Models():
             index+=1
             
         plt.show()
-
 

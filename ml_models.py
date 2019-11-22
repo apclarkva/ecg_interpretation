@@ -88,6 +88,14 @@ class Models():
         normalized_signal = positive_signal / positive_signal.max()
         return normalized_signal
 
+    def get_prs_NN(self):
+        input_shape = self.prs_input_shape 
+
+        last_layer = Dense(12, activation='sigmoid')(input_shape)
+
+        nn_model = Model(input=input_shape, output=last_layer)
+        autoencoder.compile(optimizer='adam', loss='mse')
+
     def get_100x_autoencoder(self):
         input_shape = self.input_shape
 
@@ -489,6 +497,42 @@ class Models():
         print(f"Area under the curve is {auc(false_positive, roc.SENSITIVITY)}")
 
         return roc
+
+    def get_auprc(self):
+        negatives = self.norm_max_errors
+        positives = self.afib_max_errors
+
+        all_values = np.append(negatives, positives)
+        min_value = all_values.min()
+        max_value = all_values.max()
+
+        thresholds = np.arange(min_value, max_value, .0001)
+
+        precision = np.zeros(len(thresholds))
+        recall = np.zeros(len(thresholds))
+
+        index = 0
+
+        for thr in thresholds:
+            true_positives = np.array(positives > thr).sum()
+            false_positives = np.array(negatives > thr).sum()
+
+            precision[index] = true_positives/(true_positives+false_positives)
+            recall[index] = np.array(positives > thr).mean()
+            index += 1
+        
+        import pdb
+        pdb.set_trace()
+
+        auprc = pd.DataFrame(np.transpose(np.array([precision, recall, thresholds])), columns = ['PRECISION', 'RECALL', 'THRESHOLDS'])
+        
+        print(f"Area under the curve is {auc(auprc.RECALL, auprc.PRECISION)}")
+        plt.plot(auprc.RECALL, auprc.PRECISION)
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.show()
+
+        return auprc 
 
     def get_roc_curve(self, is_plotted = True):
         roc_max = self._get_roc_data(self.norm_max_errors, self.afib_max_errors)

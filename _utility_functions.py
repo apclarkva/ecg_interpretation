@@ -1,6 +1,7 @@
 from os import listdir
 import numpy as np
 from os import makedirs
+import 
 
 
 def pickle_data(path_to_data, batch_size):
@@ -68,6 +69,7 @@ def get_train_val_loss(file_out, write_file):
             line = fp.readline()
 
         np.savetxt(write_file, new_file, fmt='%s')
+
 
 
 

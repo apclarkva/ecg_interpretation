@@ -7,7 +7,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def load_main():
-    num_obs = 700
+    num_obs = 7
     num_slices = 1
     model_obj = Models(slices=num_slices, num_channels=12)
 
@@ -16,7 +16,9 @@ def load_main():
     path_to_normals = 'data/ecg/normal_pickled_ind'
     model_obj.normal_training = []
     model_obj.load_data(path_to_normals, num_obs, rhythm_type='normal')
-    model_obj.load_data(path_to_afibs, num_files=300, rhythm_type='afib')
+    model_obj.load_data(path_to_afibs, num_files=3, rhythm_type='afib')
+    import pdb
+    pdb.set_trace()
 
     model_obj.current_model =  load_model('./data/model_results/auto_400x_9500obs_1slices_2200epochs_gpu_2/auto_400x_9500obs_1slices_2200epochs_gpu_2.h5')
 
@@ -78,3 +80,4 @@ def main():
 
 if __name__ == '__main__':
     load_main()
+

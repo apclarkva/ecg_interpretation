@@ -18,7 +18,6 @@ class ECGSignal:
         if not waveform_csv:
             self._waveforms = pd.DataFrame()
         else:
-
             self._waveforms = pd.read_csv(waveform_csv)
 
         self._arr_data = []

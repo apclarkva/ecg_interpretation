@@ -47,6 +47,7 @@ class Models():
 
         self.input_shape = Input(shape=(self.signal_length,num_channels))
 
+
     def load_data(self, path_to_data ,num_files=100, rhythm_type='normal'):
         file_names = listdir(path_to_data)
 
@@ -521,8 +522,6 @@ class Models():
             recall[index] = np.array(positives > thr).mean()
             index += 1
         
-        import pdb
-        pdb.set_trace()
 
         auprc = pd.DataFrame(np.transpose(np.array([precision, recall, thresholds])), columns = ['PRECISION', 'RECALL', 'THRESHOLDS'])
         

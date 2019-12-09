@@ -55,7 +55,6 @@ class ProcessUK:
                     index=False)
                 
 
-
     def get_is_normal(self, pt_id, diagnoses):
         d_1 = diagnoses[0].lower()
         d_2 = diagnoses[1].lower()

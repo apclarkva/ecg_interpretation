@@ -155,11 +155,6 @@ class ECGSignal:
             
         plt.show()
 
-
-        
-    
-
-
     def write_xml(self, path):
         """
         Write the current tree to the given file path
@@ -177,7 +172,7 @@ class ECGSignal:
 
 
 if __name__ == '__main__':
-    ECG_SIGNAL = ECGSignal(waveform_csv='./data/afib_example/4642804.csv')
+    ECG_SIGNAL = ECGSignal('data/test_files/1078443_20205_2_0.xml')
     ECG_SIGNAL.plot_twelve_lead()
 
     #rand_wf = ECG_SIGNAL.waveforms[9].text

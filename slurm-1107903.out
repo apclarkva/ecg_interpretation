@@ -1,8 +1,0 @@
-node151
-Using TensorFlow backend.
-no matplotlib
-no sklearn
-Traceback (most recent call last):
-  File "main.py", line 7, in <module>
-    from sklearn.decomposition import PCA
-ModuleNotFoundError: No module named 'sklearn'

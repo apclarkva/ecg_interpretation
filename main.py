@@ -7,8 +7,8 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 
 def load_main():
-    num_obs = 12000
-    num_slices = 300 
+    num_obs = 5
+    num_slices = 1 
     model_obj = Models(slices=num_slices, num_channels=12)
 
     #Data
@@ -16,7 +16,7 @@ def load_main():
     path_to_normals = 'data/ecg/normal_pickled_ind'
     model_obj.normal_training = []
     model_obj.load_data(path_to_normals, num_obs, rhythm_type='normal')
-    model_obj.load_data(path_to_afibs, num_files=365, rhythm_type='afib')
+    model_obj.load_data(path_to_afibs, num_files=5, rhythm_type='afib')
     import pdb
     pdb.set_trace()
 

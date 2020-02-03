@@ -33,4 +33,7 @@ def create_folder_key(path, deidentified_directory):
 
 if __name__ == '__main__':
     path = 'data/wcm_ecg_test' 
+    import time
+    x = time.time()
     deidentify(path)
+    print(time.time() - x)

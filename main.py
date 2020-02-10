@@ -9,7 +9,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 def load_main():
     num_obs = 5
     num_slices = 1 
-    model_obj = Models(slices=num_slices, num_channels=12)
+    model_obj = Models()
 
     #Data
     path_to_afibs = 'data/ecg/afib_pickled_ind'
@@ -96,4 +96,5 @@ def binary_NN():
 
 
 if __name__ == '__main__':
-    multi_class_NN()
+    #multi_class_NN()
+    load_main()

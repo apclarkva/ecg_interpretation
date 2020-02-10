@@ -78,7 +78,22 @@ def main():
     model_obj.plot_random_test_wave('normal')
     model_obj.plot_random_test_wave('afib')
 
-if __name__ == '__main__':
-    load_main()
-    #main()
+def multi_class_NN():
+    """
+    Use this to setup and call the multi-class classification NN
+    """
+    model = Models(current_model='multi-class')
+    model.get_multi_class_NN()
+    model.current_model.summary()
 
+    import pdb
+    pdb.set_trace()
+
+def binary_NN():
+    """
+    Use this to call the binary NN
+    """
+
+
+if __name__ == '__main__':
+    multi_class_NN()

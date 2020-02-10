@@ -1,24 +1,15 @@
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
-import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.metrics import auc
+
 from os import listdir
 import random
-try:
-    import matplotlib.pyplot as plt
-except:
-    print('no matplotlib')
-try:
-    from sklearn.decomposition import PCA
-    from sklearn.metrics import auc
-except: 
-    print('no sklearn')
-try:
-    import pandas as pd
-except: 
-    print('no pandas')
-
 
 
 class Models():
@@ -26,10 +17,12 @@ class Models():
     A Class for creating all ML models
     """
 
-    def __init__(self, test_proportion=.8, signal_length=5000, num_channels=12):
+    def __init__(self, test_proportion=.8, signal_length=5000, num_channels=12,
+                 current_model='autoencoder'):
         self.test_proportion = test_proportion
         self.signal_length = signal_length
         self.num_channels = num_channels
+        self.current_model = current_model
 
         self.normal_training = np.array([])
         self.normal_testing = np.array([])
@@ -63,25 +56,6 @@ class Models():
             self.normal_testing = input_data[num_training:, :, :]
         if rhythm_type == 'afib':
             self.afib_data = input_data
-    
-    def _norm_signal_channels(self, signal_all_channels):
-        return np.apply_along_axis(self._norm_column, 0, signal_all_channels)
-
-    def _norm_column(self, signal):
-        if signal.min() > 0:
-            positive_signal = signal - signal.min()
-        else:
-            positive_signal = signal + np.abs(signal.min())
-        normalized_signal = positive_signal / positive_signal.max()
-        return normalized_signal
-
-    def get_prs_NN(self):
-        input_shape = self.prs_input_shape 
-
-        last_layer = Dense(12, activation='sigmoid')(input_shape)
-
-        nn_model = Model(input=input_shape, output=last_layer)
-        autoencoder.compile(optimizer='adam', loss='mse')
 
     def get_100x_autoencoder(self):
         input_shape = self.input_shape
@@ -171,6 +145,46 @@ class Models():
 
         self.current_model = autoencoder
 
+    def get_multi_class_NN(self):
+        multi_class_nn = Sequential()
+        multi_class_nn.add(Conv1D(32, 10, activation='relu', padding='same',
+                           input_shape=(self.signal_length, self.num_channels)))
+        multi_class_nn.add(MaxPooling1D(2, padding='same'))
+        multi_class_nn.add(Conv1D(64, 4, activation='relu', padding='same'))
+        multi_class_nn.add(Conv1D(64, 4, activation='relu', padding='same'))
+        multi_class_nn.add(MaxPooling1D(2, padding='same'))
+        multi_class_nn.add(Conv1D(32, 4, activation='relu', padding='same'))
+        multi_class_nn.add(MaxPooling1D(2, padding='same'))
+        multi_class_nn.add(Conv1D(16, 4, activation='relu', padding='same'))
+        multi_class_nn.add(MaxPooling1D(2, padding='same'))
+        multi_class_nn.add(Conv1D(8, 4, activation='relu', padding='same'))
+        multi_class_nn.add(MaxPooling1D(2, padding='same'))
+        multi_class_nn.add(Flatten())
+        multi_class_nn.add(Dense(12, activation='sigmoid'))
+
+        multi_class_nn.compile(optimizer='adam', loss='binary_crossentropy')
+        self.current_model = multi_class_nn
+
+    def get_binary_NN(self):
+        binary_nn = Sequential()
+        binary_nn.add(Conv1D(32, 10, activation='relu', padding='same',
+                      input_shape=(self.signal_length, self.num_channels)))
+        binary_nn.add(MaxPooling1D(2, padding='same'))
+        binary_nn.add(Conv1D(64, 4, activation='relu', padding='same'))
+        binary_nn.add(Conv1D(64, 4, activation='relu', padding='same'))
+        binary_nn.add(MaxPooling1D(2, padding='same'))
+        binary_nn.add(Conv1D(32, 4, activation='relu', padding='same'))
+        binary_nn.add(MaxPooling1D(2, padding='same'))
+        binary_nn.add(Conv1D(16, 4, activation='relu', padding='same'))
+        binary_nn.add(MaxPooling1D(2, padding='same'))
+        binary_nn.add(Conv1D(8, 4, activation='relu', padding='same'))
+        binary_nn.add(MaxPooling1D(2, padding='same'))
+        binary_nn.add(Flatten())
+        binary_nn.add(Dense(1, activation='sigmoid'))
+
+        binary_nn.compile(optimizer='adam', loss='binary_crossentropy')
+        self.current_model = binary_nn
+
     def get_encoder(self):
         encoded_layer = self.current_model.layers[int(len(self.current_model.layers)/2)]
         self.encoder = Model(self.current_model.inputs, encoded_layer.output)
@@ -194,45 +208,26 @@ class Models():
         except:
             print('Could not get afib testing errors')
 
-    def _get_pt_errors(self, input_data, error_type):
-        num_patients = int(len(input_data)/self.slices)
-        errors = []
-        for i in range(0, num_patients):
-            start = i*self.slices
-            end = (i + 1)*self.slices
-            if error_type == 'max':
-                errors.append(input_data[start:end].max())
-            elif error_type == 'avg': 
-                errors.append(input_data[start:end].mean())
-
-
-        return np.array(errors)
-
-    def _return_all_errors(self, input_data, error_type='mae'):
-        test_error = np.zeros(len(input_data[:, 0, 0]))
-        for i in range(0, len(test_error)):
-            current_input = np.expand_dims(input_data[i,:,:], axis=0)
-            if error_type == 'mae':
-                test_error[i] = self.current_model.evaluate(current_input, current_input)
-            elif error_type == 'error_var':
-                output = self.current_model.predict(current_input)
-                error = current_input - output
-                #test_error[i] = np.sort(np.abs(error.flatten()))[-500:].mean()
-                test_error[i] =  np.abs(error)[:,:,7].mean()
-            print(i)
-
-        return test_error
-
     def load_existing_model(self, file_name):
         self.current_model = load_model(file_name)
 
-    def run_autoencoder(self, val_split=.2, n_batch=32, n_epochs=100):
-        self.history = self.current_model.fit(self.normal_training,
-                                              self.normal_training,
-                                              validation_split=val_split,
-                                              verbose=1,
-                                              batch_size=n_batch,
-                                              epochs=n_epochs)
+    def run_model(self, val_split=.2, n_batch=32, n_epochs=100):
+        if (self.current_model == "autoencoder"):
+            self.history = self.current_model.fit(self.normal_training,
+                                                  self.normal_training,
+                                                  validation_split=val_split,
+                                                  verbose=1,
+                                                  batch_size=n_batch,
+                                                  epochs=n_epochs)
+        elif (self.current_model == "multi-class"):
+            self.history = self.current_model.fit(self.training_ecg,
+                                                  self.multi_diagnosis,
+                                                  validation_split=val_split,
+                                                  verbose=1,
+                                                  batch_size=n_batch,
+                                                  epochs=n_epochs)
+        else:
+            print("The current model didn't work")
 
     def plot_history(self):
         if not self.history:
@@ -253,12 +248,17 @@ class Models():
             print('Could not plot loss')
 
     def evaluate_model(self):
-        self.norm_eval = self.current_model.evaluate(self.normal_testing,
-                                                     self.normal_testing)
-        self.afib_eval = self.current_model.evaluate(self.afib_data,
+        if (self.current_model == 'autoencoder'):
+            self.norm_eval = self.current_model.evaluate(self.normal_testing,
+                                                         self.normal_testing)
+            self.afib_eval = self.current_model.evaluate(self.afib_data,
                                                      self.afib_data)
 
-    def predict_test_data(self, is_plotted=False, n_bin=40, n_range=.02, error_type='avg'):
+    def predict_test_data(self, is_plotted=False, n_bin=40, n_range=.02,
+                          error_type='avg'):
+        """
+        TODO: Generalize to NN models
+        """
         if self.norm_predict.size == 0:
             self.norm_predict = self.current_model.predict(self.normal_testing)
             self.afib_predict = self.current_model.predict(self.afib_data)
@@ -280,33 +280,6 @@ class Models():
             plt.ylabel('Probability Density')
             plt.legend()
             plt.show()
-
-    def _get_roc_data(self, negatives, positives):
-        all_values = np.append(negatives, positives)
-        min_value = all_values.min()
-        max_value = all_values.max()
-
-        thresholds = np.arange(min_value, max_value, .0001)
-
-        sensitivity = np.zeros(len(thresholds))
-        specificity = np.zeros(len(thresholds))
-
-        index = 0
-
-        for thr in thresholds:
-            sensitivity[index] = np.array(positives > thr).mean()
-            specificity[index] = np.array(negatives < thr).mean()
-            
-            index +=1
-        
-        roc = pd.DataFrame(np.transpose(np.array([sensitivity, specificity,
-            thresholds])), columns = ['SENSITIVITY', 'SPECIFICITY', 'THRESHOLDS'])
-        
-        false_positive = 1-roc.SPECIFICITY
-
-        print(f"Area under the curve is {auc(false_positive, roc.SENSITIVITY)}")
-
-        return roc
 
     def get_auprc(self):
         negatives = self.norm_max_errors
@@ -407,7 +380,7 @@ class Models():
 
         self.plot_twelve_lead(pd.DataFrame(original_wave),
                               pd.DataFrame(autoencoded_wave))
-        
+
     def plot_twelve_lead(self, original, prediction):
         original.plot(subplots=True,
                             layout=(6, 2),
@@ -425,3 +398,71 @@ class Models():
             
         plt.show()
 
+
+
+    def _norm_signal_channels(self, signal_all_channels):
+        return np.apply_along_axis(self._norm_column, 0, signal_all_channels)
+
+    def _norm_column(self, signal):
+        if signal.min() > 0:
+            positive_signal = signal - signal.min()
+        else:
+            positive_signal = signal + np.abs(signal.min())
+        normalized_signal = positive_signal / positive_signal.max()
+        return normalized_signal
+
+    def _get_pt_errors(self, input_data, error_type):
+        num_patients = int(len(input_data)/self.slices)
+        errors = []
+        for i in range(0, num_patients):
+            start = i*self.slices
+            end = (i + 1)*self.slices
+            if error_type == 'max':
+                errors.append(input_data[start:end].max())
+            elif error_type == 'avg': 
+                errors.append(input_data[start:end].mean())
+
+
+        return np.array(errors)
+
+    def _return_all_errors(self, input_data, error_type='mae'):
+        test_error = np.zeros(len(input_data[:, 0, 0]))
+        for i in range(0, len(test_error)):
+            current_input = np.expand_dims(input_data[i,:,:], axis=0)
+            if error_type == 'mae':
+                test_error[i] = self.current_model.evaluate(current_input, current_input)
+            elif error_type == 'error_var':
+                output = self.current_model.predict(current_input)
+                error = current_input - output
+                #test_error[i] = np.sort(np.abs(error.flatten()))[-500:].mean()
+                test_error[i] =  np.abs(error)[:,:,7].mean()
+            print(i)
+
+        return test_error
+
+    def _get_roc_data(self, negatives, positives):
+        all_values = np.append(negatives, positives)
+        min_value = all_values.min()
+        max_value = all_values.max()
+
+        thresholds = np.arange(min_value, max_value, .0001)
+
+        sensitivity = np.zeros(len(thresholds))
+        specificity = np.zeros(len(thresholds))
+
+        index = 0
+
+        for thr in thresholds:
+            sensitivity[index] = np.array(positives > thr).mean()
+            specificity[index] = np.array(negatives < thr).mean()
+            
+            index +=1
+        
+        roc = pd.DataFrame(np.transpose(np.array([sensitivity, specificity,
+            thresholds])), columns = ['SENSITIVITY', 'SPECIFICITY', 'THRESHOLDS'])
+        
+        false_positive = 1-roc.SPECIFICITY
+
+        print(f"Area under the curve is {auc(false_positive, roc.SENSITIVITY)}")
+
+        return roc

@@ -51,8 +51,8 @@ class ProcessUK:
             else:
                 continue
 
-            #np.save(f'./{self.path_to_raw_xml}/{classification}_pickled/{pt[0]}', 
-            #        new_pt.waveforms.values)
+            np.save(f'./{self.path_to_raw_xml}/{classification}_pickled/{pt[0]}', 
+                    new_pt.waveforms.values)
 
     def get_is_normal(self, pt_id, diagnoses):
         d_1 = diagnoses[0].lower()

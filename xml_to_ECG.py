@@ -78,6 +78,18 @@ class ECGSignal:
 
         waveform_pd = pd.DataFrame()
 
+        if waveforms[0].tag == 'FullDisclosureData':
+            lead_name = 'everything' 
+            lead_values = np.array([int(num_str) for num_str in
+                                    waveforms[0].text.split(',') 
+                                    if not (('\t' in num_str) or 
+                                            ('\n' in num_str))])
+            import pdb
+            pdb.set_trace()
+            waveform_pd[lead_name] = lead_values
+
+            return waveform_pd
+
         for wave in waveforms:
             lead_name = wave.attrib['lead']
             lead_values = np.array([int(num_str) for num_str in

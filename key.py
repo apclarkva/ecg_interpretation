@@ -20,7 +20,7 @@ class Key:
 
         Parameters
         ----------
-        deirectory_path: String
+        directory_path: String
             The path to a directory of XML files you want to deidentify
         identifiable_elements: List of Strings
             A list of tag names that include identifiable information
